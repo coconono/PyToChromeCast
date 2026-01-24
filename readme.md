@@ -28,3 +28,23 @@ This script will attempt, in order:
 
 - pychromecast
 - casttube
+
+## Python Environment Setup
+
+It is recommended to use a virtual environment for isolation:
+
+```sh
+# Create a virtual environment (Python 3.14+ recommended)
+python3 -m venv .venv
+
+# Activate the environment (macOS/Linux)
+source .venv/bin/activate
+# On Windows, use:
+# .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the script
+python cast_yt.py --device "Your Chromecast Name" --url "https://youtu.be/xxxxx" [--verbose]
+```
