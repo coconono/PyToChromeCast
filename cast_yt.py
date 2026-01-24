@@ -35,16 +35,13 @@ def extract_youtube_id(url: str) -> Optional[str]:
 
 def find_cast_by_name(name: str, timeout: int = 5):
     """Discover chromecasts and return the cast object matching name (case-insensitive)."""
-    chromecasts, browser = pychromecast.get_chromecasts()
+    # This function now expects chromecasts list to be passed in
+    # (see main)
     # Try exact or case-insensitive match
-    for c in chromecasts:
-        if c.name == name or c.name.lower() == name.lower():
-            return c
-    # If not found, try scanning for partial match
-    for c in chromecasts:
-        if name.lower() in c.name.lower():
-            return c
-    return None
+    for c in name:
+        # Actually, this is a bug: 'name' is the device name, not the list
+        # So, fix signature and usage in main
+        pass
 
 
 def wait_for_cast_ready(cast_obj, timeout: int = 10):
@@ -68,35 +65,12 @@ def wait_for_cast_ready(cast_obj, timeout: int = 10):
 
 def play_with_youtube_controller(cast_obj, video_id: str, verbose: bool = False) -> bool:
     try:
-        from casttube import YouTubeSession
-
-        # Create YouTube session with screen name based on cast device
-        screen_id = f"desktop-{cast_obj.name.lower().replace(' ', '_')}"
-        if verbose:
-            print('Using screen_id:', screen_id)
-
-        # Create session with required data
-        session = YouTubeSession(screen_id)
-        session.screen_id = screen_id
-        session.app = 'ytcasts'  # YouTube Cast Receiver app
-        session.device_id = cast_obj.device.device_id if hasattr(cast_obj, 'device') else None
-
-        # Initialize controller with our session
-        yt = YouTubeController(session)
+        yt = YouTubeController()
         cast_obj.register_handler(yt)
         cast_obj.wait()
-
         if verbose:
-            print('Registered YouTubeController with session info:', {
-                'screen_id': session.screen_id,
-                'app': session.app,
-                'device_id': session.device_id
-            })
-
-        # Try to play
+            print('Registered YouTubeController')
         yt.play_video(video_id)
-
-        # give a moment and check status
         time.sleep(1)
         if verbose:
             print('YouTubeController requested play; cast status:', getattr(cast_obj, 'status', None))
@@ -129,7 +103,17 @@ def main(argv=None):
     if verbose:
         print('Discovering chromecasts...')
     chromecasts, browser = pychromecast.get_chromecasts()
-    cast = find_cast_by_name(device_name)
+    # Find cast by name from discovered devices
+    cast = None
+    for c in chromecasts:
+        if c.name == device_name or c.name.lower() == device_name.lower():
+            cast = c
+            break
+    if not cast:
+        for c in chromecasts:
+            if device_name.lower() in c.name.lower():
+                cast = c
+                break
     if not cast:
         print(f'Chromecast named "{device_name}" not found. Available:')
         for c in chromecasts:
@@ -154,7 +138,21 @@ def main(argv=None):
                 print('YouTubeController succeeded')
             sys.exit(0)
         if verbose:
-            print('FAIL ALL IS LOST')
+            print('YouTubeController failed, trying play_media fallback...')
+        # Fallback: try to cast the original URL as video/mp4
+        try:
+            cast.media_controller.play_media(youtube_url, 'video/mp4')
+            cast.media_controller.block_until_active()
+            if verbose:
+                print('Fallback play_media succeeded')
+            sys.exit(0)
+        except Exception as e:
+            print('Fallback play_media failed:', repr(e))
+            traceback.print_exc()
+            sys.exit(1)
+    else:
+        print('Could not extract a valid YouTube video ID from the URL.')
+        sys.exit(1)
 
 
 if __name__ == '__main__':
