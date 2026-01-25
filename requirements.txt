@@ -1,2 +1,5 @@
+
 pychromecast
 casttube
+requests
+pyyaml
