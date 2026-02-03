@@ -1,6 +1,6 @@
-## cast_yt.py
+# cast_yt.py
 
-This script sends a youtube link to a casting device via python. It works best when you already have the youtube app open on your cast target. 
+This script sends a youtube link to a casting device via python. It works best when you already have the youtube app open on your cast target.
 
 ## Usage
 
@@ -23,6 +23,7 @@ python cast_yt.py --device "Music Barn TV" --url "https://youtu.be/x1t-z4QO4-M?s
 ## How it works
 
 This script will attempt, in order:
+
 - Use pychromecast's YouTubeController to open the YouTube app and play the video (preferred)
 - If that fails, fall back to `cast.play_media(original_url, 'video/mp4')`
 
@@ -35,7 +36,7 @@ This script will attempt, in order:
 
 This script lists all available Chromecast devices on your local network.
 
-### Usage
+### list_cast.py Usage
 
 ```sh
 python list_cast.py
@@ -43,7 +44,7 @@ python list_cast.py
 
 This will output a list of Chromecast device names and their IP addresses, for example:
 
-```
+```sh
 Searching for Chromecast devices on the local network...
 Found 2 device(s):
 - Music Barn TV (192.168.0.165)
@@ -56,26 +57,30 @@ Use this script to discover the exact device names to use with `cast_yt.py`.
 
 This script searches YouTube and returns video links and short text summaries for a given query.
 
-### Usage
+### search_yt.py Usage
 
 ```sh
 python search_yt.py "cool RC cars"
 ```
 
 #### Optional arguments
+
 - `--max N` : Maximum number of results to return (default: 5)
 
 ### YouTube API Key Setup
 
 1. Copy `config.yaml.example` to `config.yaml`:
+
    ```sh
    cp config.yaml.example config.yaml
    ```
+
 2. Follow the instructions in `config.yaml.example` to obtain a YouTube Data API v3 key and paste it into `config.yaml`.
 3. **Do not commit your real API key!** `config.yaml` is already in `.gitignore`.
 
 ### Example Output
-```
+
+```sh
 1. Cool RC Cars Compilation
    https://www.youtube.com/watch?v=XXXXXXXXXXX
    A fun compilation of cool RC cars in action...
