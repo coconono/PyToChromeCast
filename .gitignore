@@ -1,3 +1,6 @@
+#Ignore local shell scripts
+*.sh
+
 # Ignore YouTube API config
 config.yaml
 # Ignore prompt.txt
